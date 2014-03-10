@@ -23,7 +23,7 @@ findText number (a:xs) | getNumber a == number = getText a
 translateNumbers []     = []
 translateNumbers (a:xs) = findText a dic : translateNumbers xs 
 
-persons = [ ("goku",25), ("bulma",30), ("gohan",5), ("kame", 70) ]
+people = [ ("goku",25), ("bulma",30), ("gohan",5), ("kame", 70) ]
 
 older (a,b) (x,y) | b > y     = (a,b)
                   | otherwise = (x,y)
@@ -37,4 +37,9 @@ newer (a,b) (x,y) | b < y     = (a,b)
 newerFromList [a]      = a
 newerFromList (a:b:xs) = newerFromList (newer a b : xs)
 
-olderAndNewer = (olderFromList persons, newerFromList persons)
+olderAndNewer = (olderFromList people, newerFromList people)
+
+delPos :: [Int] -> Int -> [Int]
+delPos (a:xs) n | n == 0 = (a:xs)
+                | n == 1 = xs
+                | otherwise = (a:(delPos xs (n - 1)))
