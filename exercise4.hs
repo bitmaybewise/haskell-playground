@@ -4,15 +4,15 @@ higher (a:xs) | a > higher xs = a
 
 lower [] = maxBound::Int
 lower (a:xs) | a < lower xs = a
-			       | otherwise = lower xs
+             | otherwise = lower xs
 
 higherAndLower [] = (0,0)
 higherAndLower xs = (higher xs, lower xs)
 
 dic = [ 
-        (0,"zero"), (1,"one"), (2,"two"),   (3,"three"), (4,"four"), 
-        (5,"five"), (6,"six"), (7,"seven"), (8,"eight"), (9,"nine") 
-      ]
+  (0,"zero"), (1,"one"), (2,"two"),   (3,"three"), (4,"four"), 
+  (5,"five"), (6,"six"), (7,"seven"), (8,"eight"), (9,"nine") 
+]
 
 getNumber (a,b) = a
 getText   (a,b) = b
