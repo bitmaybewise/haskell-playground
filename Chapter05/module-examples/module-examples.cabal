@@ -61,6 +61,9 @@ library
     exposed-modules:  MyLib
                     , HaskellBook.Examples.Introduction.CreatingModules
                     , HaskellBook.Examples.SortedList
+                    , HaskellBook.Examples.UserInfo
+                    , HaskellBook.Examples
+                    , ModuleDemo
 
     -- Modules included in this library but not exported.
     -- other-modules:
