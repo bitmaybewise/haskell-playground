@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -12,7 +11,7 @@ import qualified Data.Time.Clock as Clock
 import qualified Data.Time.Format as TimeFormat
 import qualified System.Directory as Directory
 import qualified System.Environment as Env
-import System.IO (BufferMode (NoBuffering), IOMode (ReadMode), hGetChar, hSetBuffering, openFile, stdin, stdout)
+import System.IO (BufferMode (NoBuffering), IOMode (ReadMode), hSetBuffering, openFile, stdin, stdout)
 import qualified System.IO.Error as IOError
 import qualified System.Info as SystemInfo
 import System.Process (readProcess)
@@ -114,23 +113,23 @@ getTerminalSize =
 data ContinueCancel = Continue | Cancel deriving (Eq, Show)
 
 getContinue :: IO ContinueCancel
-getContinue =
+getContinue = do
   hSetBuffering stdin NoBuffering
-    >> hGetChar stdin
-    >>= \case
-      ' ' -> return Continue
-      'q' -> return Cancel
-      _ -> getContinue
+  char <- getChar
+  case char of
+    ' ' -> return Continue
+    'q' -> return Cancel
+    _ -> getContinue
 
 showPages :: [Text.Text] -> IO ()
 showPages [] = return ()
-showPages (page : pages) =
+showPages (page : pages) = do
   clearScreen
-    >> TextIO.putStrLn page
-    >> getContinue
-    >>= \case
-      Continue -> showPages pages
-      Cancel -> return ()
+  TextIO.putStrLn page
+  whatNext <- getContinue
+  case whatNext of
+    Continue -> showPages pages
+    Cancel -> return ()
 
 clearScreen :: IO ()
 clearScreen =
