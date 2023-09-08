@@ -20,7 +20,7 @@ import Text.Printf (printf)
 import Prelude hiding (lines)
 
 runHCat :: IO ()
-runHCat = do
+runHCat = handleIOError $ do
   targetFilePath <- eitherToErr =<< handleArgs
   contents <- TextIO.hGetContents =<< openFile targetFilePath ReadMode
   termSize <- getTerminalSize
@@ -93,19 +93,23 @@ paginate (ScreenDimensions rows cols) finfo text =
 getTerminalSize :: IO ScreenDimensions
 getTerminalSize =
   case SystemInfo.os of
-    "darwin" -> tputScreenDimensions
-    "linux" -> tputScreenDimensions
-    _other -> pure $ ScreenDimensions 25 80
+    "darwin" -> Exception.catch tputScreenDimensions handleMissingCommand
+    "linux" -> Exception.catch tputScreenDimensions handleMissingCommand
+    _other -> defaultDimensions
   where
+    defaultDimensions = pure $ ScreenDimensions 25 80
+    command = "tput"
+
+    handleMissingCommand :: IOError -> IO ScreenDimensions
+    handleMissingCommand _ = defaultDimensions
+
     tputScreenDimensions :: IO ScreenDimensions
-    tputScreenDimensions =
-      readProcess "tput" ["lines"] ""
-        >>= \lines ->
-          readProcess "tput" ["cols"] ""
-            >>= \cols ->
-              let lines' = read $ init lines
-                  cols' = read $ init cols
-               in return $ ScreenDimensions lines' cols'
+    tputScreenDimensions = do
+      lines <- readProcess command ["lines"] ""
+      cols <- readProcess command ["cols"] ""
+      let lines' = read $ init lines
+          cols' = read $ init cols
+      return $ ScreenDimensions lines' cols'
 
 data ContinueCancel = Continue | Cancel deriving (Eq, Show)
 
