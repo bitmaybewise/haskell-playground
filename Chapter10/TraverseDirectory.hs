@@ -27,10 +27,9 @@ dropSuffix suffix s
   | suffix `isSuffixOf` s = take (length s - length suffix) s
   | otherwise = s
 
-traverseDirectory :: FilePath -> (FilePath -> a) -> IO [a]
+traverseDirectory :: FilePath -> (FilePath -> IO ()) -> IO ()
 traverseDirectory rootPath action = do
   seenRef <- newIORef Set.empty
-  resultRef <- newIORef []
   let haveSeenDirectory canonicalPath =
         Set.member canonicalPath <$> readIORef seenRef
 
@@ -46,15 +45,31 @@ traverseDirectory rootPath action = do
             classification <- classifyFile canonicalPath
             case classification of
               FileTypeOther -> pure ()
-              FileTypeRegularFile ->
-                modifyIORef resultRef (\results -> action file : results)
+              FileTypeRegularFile -> action file
               FileTypeDirectory -> do
                 alreadyProcessed <- haveSeenDirectory file
                 unless alreadyProcessed $ do
                   addDirectoryToSeen file
                   traverseSubdirectory file
-
   traverseSubdirectory (dropSuffix "/" rootPath)
-  readIORef resultRef
 
-main = traverseDirectory "/tmp" id >>= print
+traverseDirectory' :: FilePath -> (FilePath -> a) -> IO [a]
+traverseDirectory' rootPath action = do
+  resultsRef <- newIORef []
+  traverseDirectory rootPath $ \file -> do
+    modifyIORef resultsRef (action file :)
+  readIORef resultsRef
+
+traverseDirectoryIO :: FilePath -> (FilePath -> IO a) -> IO [a]
+traverseDirectoryIO rootPath ioAction = do
+  resultsRef <- newIORef []
+  traverseDirectory rootPath $ \file -> do
+    value <- ioAction file
+    modifyIORef resultsRef (value :)
+  readIORef resultsRef
+
+main :: IO ()
+main = traverseDirectory' "/tmp" id >>= print
+
+mainIO :: IO ()
+mainIO = traverseDirectoryIO "/tmp" pure >>= print
