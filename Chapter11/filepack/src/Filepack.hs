@@ -2,7 +2,7 @@
 
 module Filepack where
 
-import Data.Binary (Word32, Word8)
+import Data.Binary (Word16, Word32, Word8)
 import Data.Bits (Bits (shift, (.&.), (.|.)))
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as BS
@@ -10,7 +10,7 @@ import Data.ByteString.Base64 qualified as B64
 import Data.ByteString.Char8 qualified as BC
 import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
-import System.Posix (FileMode)
+import System.Posix.Types (CMode (..), FileMode)
 import Text.Read (readEither)
 
 data FileContents
@@ -61,45 +61,47 @@ instance Encode String where
 instance Decode String where
   decode = Right . BC.unpack
 
-word32ToBytes :: Word32 -> (Word8, Word8, Word8, Word8)
-word32ToBytes word =
+word16ToBytes :: Word16 -> (Word8, Word8)
+word16ToBytes word =
   let a = fromIntegral $ 255 .&. word
-      b = fromIntegral $ 255 .&. (shift word (-8))
-      c = fromIntegral $ 255 .&. (shift word (-16))
-      d = fromIntegral $ 255 .&. (shift word (-24))
-   in (a, b, c, d)
+      b = fromIntegral $ 255 .&. shift word (-8)
+   in (a, b)
 
-word32ToByteString :: Word32 -> ByteString
-word32ToByteString word =
-  let (a, b, c, d) = word32ToBytes word
-   in BS.pack [a, b, c, d]
+word16ToByteString :: Word16 -> ByteString
+word16ToByteString word =
+  let (a, b) = word16ToBytes word
+   in BS.pack [a, b]
 
-consWord32 :: Word32 -> ByteString -> ByteString
-consWord32 word bytestring =
-  let packedWord = word32ToByteString word
+consWord16 :: Word16 -> ByteString -> ByteString
+consWord16 word bytestring =
+  let packedWord = word16ToByteString word
    in packedWord <> bytestring
 
-instance Encode Word32 where
-  encode = word32ToByteString
+instance Encode Word16 where
+  encode = word16ToByteString
 
-word32FromBytes :: (Word8, Word8, Word8, Word8) -> Word32
-word32FromBytes (a, b, c, d) =
+word16FromBytes :: (Word8, Word8) -> Word16
+word16FromBytes (a, b) =
   let a' = fromIntegral a
       b' = shift (fromIntegral b) 8
-      c' = shift (fromIntegral c) 16
-      d' = shift (fromIntegral d) 24
-   in a' .|. b' .|. c' .|. d'
+   in a' .|. b'
 
-bytestringToWord32 :: ByteString -> Either String Word32
-bytestringToWord32 bytestring =
+bytestringToWord16 :: ByteString -> Either String Word16
+bytestringToWord16 bytestring =
   case BS.unpack bytestring of
-    [a, b, c, d] -> Right $ word32FromBytes (a, b, c, d)
+    [a, b] -> Right $ word16FromBytes (a, b)
     _otherwise ->
       let l = show $ BS.length bytestring
        in Left ("Expecting 4 bytes but got " <> l)
 
-instance Decode Word32 where
-  decode = bytestringToWord32
+instance Decode Word16 where
+  decode = bytestringToWord16
+
+instance Encode FileMode where
+  encode (CMode fMode) = encode fMode
+
+instance Decode FileMode where
+  decode = fmap CMode . decode
 
 sampleFilePack :: FilePack
 sampleFilePack =
