@@ -5,6 +5,7 @@
 
 module Filepack where
 
+import Control.Monad (when)
 import Data.Binary (Word16, Word32, Word8)
 import Data.Bits (Bits (shift, (.&.), (.|.)))
 import Data.ByteString (ByteString)
@@ -13,9 +14,6 @@ import Data.ByteString.Char8 qualified as BC
 import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 import System.Posix.Types (CMode (..), FileMode)
-
--- import Data.ByteString.Base64 qualified as B64
--- import Text.Read (readEither)
 
 data FileData a = FileData
   { fileName :: FilePath,
@@ -28,13 +26,6 @@ data FileData a = FileData
 data Packable = forall a. (Encode a) => Packable {getPackable :: FileData a}
 
 newtype FilePack = FilePack [Packable]
-
--- packFiles :: FilePack -> ByteString
--- packFiles = B64.encode . BC.pack . show
-
--- unpackFiles :: ByteString -> Either String FilePack
--- unpackFiles serializedData =
---   B64.decode serializedData >>= readEither . BC.unpack
 
 class Encode a where
   encode :: a -> ByteString
@@ -166,11 +157,20 @@ instance (Encode a) => Encode (FileData a) where
      in encode encodedData
 
 instance (Decode a) => Decode (FileData a) where
-  decode _ = undefined
+  decode =
+    execParser $
+      FileData
+        <$> extractValue
+        <*> extractValue
+        <*> extractValue
+        <*> extractValue
 
 instance (Encode a, Encode b) => Encode (a, b) where
   encode (a, b) =
     encode $ encodeWithSize a <> encodeWithSize b
+
+instance (Decode a, Decode b) => Decode (a, b) where
+  decode = execParser $ (,) <$> extractValue <*> extractValue
 
 instance {-# OVERLAPPABLE #-} (Encode a) => Encode [a] where
   encode = encode . foldMap encodeWithSize
@@ -217,35 +217,84 @@ testEncodeValue =
           }
    in encode $ a .: b .: c .: emptyFilePack
 
--- sampleFilePack :: FilePack
--- sampleFilePack =
---   FileData
---     { fileName = "stringFile",
---       fileSize = 0,
---       filePermissions = 0,
---       fileData = "hello" :: String
---     }
---     .: FileData
---       { fileName = "textFile",
---         fileSize = 0,
---         filePermissions = 0,
---         fileData = "hello text" :: Text
---       }
---     .: FileData
---       { fileName = "binaryFile",
---         fileSize = 0,
---         filePermissions = 0,
---         fileData = "hello text" :: ByteString
---       }
---     .: emptyFilePack
+naiveDecodeWord32 :: ByteString -> Either String (Word32, ByteString)
+naiveDecodeWord32 inputString = do
+  when (BS.length inputString < 4) $
+    Left "Error, not enough data to get the size of the next field"
+  let (encodedSizePrefix, rest) = BS.splitAt 4 inputString
+  sizePrefix <- fromIntegral <$> bytestringToWord32 encodedSizePrefix
+  when (sizePrefix /= 4) $
+    Left "the field size of a word should be 4"
+  when (BS.length rest < fromIntegral sizePrefix) $
+    Left "Not enough data for the next field size"
+  let (encodedWord, rest') = BS.splitAt sizePrefix rest
+  decodedWord <- decode encodedWord
+  pure (decodedWord, rest')
 
--- testPackFile :: ByteString
--- testPackFile =
---   packFiles sampleFilePack
+extractBytes :: Int -> ByteString -> Either String (ByteString, ByteString)
+extractBytes n byteString = do
+  when (BS.length byteString < n) $
+    Left $
+      "Error, extract bytes needs at least " <> show n <> " bytes"
+  pure $ BS.splitAt n byteString
 
--- testUnpackFile :: Either String FilePack
--- testUnpackFile = unpackFiles testPackFile
+nextSegmentSize :: ByteString -> Either String (Word32, ByteString)
+nextSegmentSize byteString = do
+  (nextSegmentStr, rest) <- extractBytes 4 byteString
+  parsedSegmentSize <- bytestringToWord32 nextSegmentStr
+  pure (parsedSegmentSize, rest)
 
--- testRoundTrip :: FilePack -> Bool
--- testRoundTrip pack =
---   Right pack == unpackFiles (packFiles pack)
+newtype FilePackParser a = FilePackParser
+  {runParser :: ByteString -> Either String (a, ByteString)}
+
+instance Functor FilePackParser where
+  fmap f parser = FilePackParser $ \input -> do
+    (parsedValue, result) <- runParser parser input
+    pure (f parsedValue, result)
+
+instance Applicative FilePackParser where
+  pure a = FilePackParser $ \s -> pure (a, s)
+  f <*> s = FilePackParser $ \input -> do
+    (f', initialRemainder) <- runParser f input
+    (a, finalRemainder) <- runParser s initialRemainder
+    pure (f' a, finalRemainder)
+
+extractValue :: (Decode a) => FilePackParser a
+extractValue = FilePackParser $ \input -> do
+  when (BS.length input < 4) $
+    Left "INput has less than 4 bytes, we can't get a segment size"
+  let (rawSegmentSize, rest) = BS.splitAt 4 input
+  segmentSize <- fromIntegral <$> bytestringToWord32 rawSegmentSize
+  when (BS.length rest < segmentSize) $
+    Left "not enough input to parse the next value"
+  let (rawSegmentValue, rest') = BS.splitAt segmentSize rest
+  case decode rawSegmentValue of
+    Left err -> Left err
+    Right a -> Right (a, rest')
+
+execParser :: FilePackParser a -> ByteString -> Either String a
+execParser parser inputString =
+  fst <$> runParser parser inputString
+
+testRoundTrip :: (Decode a, Encode a, Eq a, Show a) => a -> IO ()
+testRoundTrip val =
+  case decode (encode val) of
+    Left err ->
+      putStrLn $ "Failed to round-trip value: " <> err
+    Right roundTripVal
+      | roundTripVal == val ->
+          putStrLn "It works!"
+      | otherwise -> do
+          putStrLn "Round-trip failed!"
+          putStrLn $ "expected: " <> show val
+          putStrLn $ "got:      " <> show roundTripVal
+
+runRoundTripTest :: IO ()
+runRoundTripTest =
+  testRoundTrip $
+    FileData
+      { fileName = "c",
+        fileSize = 8,
+        filePermissions = 0644,
+        fileData = (0, "zero") :: (Word32, String)
+      }
