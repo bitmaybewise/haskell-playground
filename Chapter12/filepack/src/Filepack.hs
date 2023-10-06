@@ -5,6 +5,7 @@
 
 module Filepack where
 
+import Control.Applicative
 import Control.Monad (when)
 import Data.Binary (Word16, Word32, Word8)
 import Data.Bits (Bits (shift, (.&.), (.|.)))
@@ -298,3 +299,54 @@ runRoundTripTest =
         filePermissions = 0644,
         fileData = (0, "zero") :: (Word32, String)
       }
+
+extractValues :: (Decode a) => FilePackParser [a]
+extractValues = FilePackParser $ \input ->
+  if BS.null input
+    then Right ([], "")
+    else do
+      (val, rest) <- runParser extractValue input
+      (tail, rest') <- runParser extractValues rest
+      pure (val : tail, rest')
+
+parseEven :: FilePackParser Word32
+parseEven = FilePackParser $ \input -> do
+  (n, rest) <- runParser extractValue input
+  when (odd n) $
+    Left $
+      show n <> ": value is odd"
+  pure (n, rest)
+
+parseSome :: FilePackParser a -> FilePackParser [a]
+parseSome parseElement = (:) <$> parseElement <*> parseMany parseElement
+
+parseMany :: FilePackParser a -> FilePackParser [a]
+parseMany parseElement = parseSome parseElement <|> pure []
+
+extractOptional :: FilePackParser a -> FilePackParser (Maybe a)
+extractOptional parseElement = Just <$> parseElement <|> pure Nothing
+
+instance Alternative FilePackParser where
+  empty = FilePackParser $ const (Left "empty parser")
+  parserA <|> parserB = FilePackParser $ \s ->
+    case runParser parserA s of
+      Right val -> Right val
+      Left _ -> runParser parserB s
+
+instance {-# OVERLAPPABLE #-} (Decode a) => Decode [a] where
+  decode = execParser (many extractValue)
+
+testDecodeValue ::
+  ByteString ->
+  Either
+    String
+    ( FileData String,
+      FileData [Text],
+      FileData (Word32, String)
+    )
+testDecodeValue =
+  execParser $
+    (,,)
+      <$> extractValue
+      <*> extractValue
+      <*> extractValue
