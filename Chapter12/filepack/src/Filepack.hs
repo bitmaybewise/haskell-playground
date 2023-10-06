@@ -350,3 +350,68 @@ testDecodeValue =
       <$> extractValue
       <*> extractValue
       <*> extractValue
+
+instance Monad FilePackParser where
+  return = pure
+  (>>=) :: FilePackParser a -> (a -> FilePackParser b) -> FilePackParser b
+  valParser >>= mkParser = FilePackParser $ \input -> do
+    (val, rest) <- runParser valParser input
+    runParser (mkParser val) rest
+
+data FilePackImage
+  = FilePackPBM Word32 Word32 [Word32]
+  | FilePackPGM Word32 Word32 Word32 [Word32]
+  deriving (Eq, Show)
+
+instance Encode FilePackImage where
+  encode (FilePackPBM width height values) =
+    encode $
+      encodeWithSize @String "pbm"
+        <> encodeWithSize width
+        <> encodeWithSize height
+        -- The Encode instance for list already includes size info
+        <> encode values
+  encode (FilePackPGM width height maxValue values) =
+    encode $
+      encodeWithSize @String "pgm"
+        <> encodeWithSize width
+        <> encodeWithSize height
+        <> encodeWithSize maxValue
+        -- The Encode instance for list already includes size info
+        <> encode values
+
+parsePBM, parsePGM :: FilePackParser FilePackImage
+parsePBM =
+  FilePackPBM
+    <$> extractValue
+    <*> extractValue
+    <*> many extractValue
+parsePGM =
+  FilePackPGM
+    <$> extractValue
+    <*> extractValue
+    <*> extractValue
+    <*> many extractValue
+
+getNetpbmParser :: String -> FilePackParser FilePackImage
+getNetpbmParser tag =
+  case tag of
+    "pbm" -> parsePBM
+    "pgm" -> parsePGM
+    otherTag ->
+      fail $ "unknown image tag: " <> otherTag
+
+getNetpbmTag :: FilePackParser String
+getNetpbmTag = extractValue
+
+-- parseImage ::
+--   FilePackParser String ->
+--   (String -> FilePackParser FilePackImage) ->
+--   FilePackParser FilePackImage
+parseImage = getNetpbmTag >>= getNetpbmParser
+
+instance Decode FilePackImage where
+  decode = execParser parseImage
+
+instance MonadFail FilePackParser where
+  fail errMsg = FilePackParser (const $ Left errMsg)
