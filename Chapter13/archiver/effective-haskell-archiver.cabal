@@ -59,7 +59,9 @@ library
     import:           warnings
 
     -- Modules exported by the library.
-    exposed-modules:  Archiver, MonadStateDemo
+    exposed-modules:  Archiver
+                    , MonadStateDemo
+                    , ClassyArchiver
 
     -- Modules included in this library but not exported.
     -- other-modules:

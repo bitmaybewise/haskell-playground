@@ -8,6 +8,7 @@ import Control.Applicative
 import Control.Monad.Except
 import Control.Monad.State
 import Data.ByteString (ByteString)
+import Data.ByteString qualified as ByteString
 import Data.Text (Text)
 import Data.Text qualified as Text
 
@@ -40,3 +41,7 @@ parseChar = do
     Just (c, rest) -> do
       Archiver (put rest)
       pure c
+
+readArchiverContents :: FilePath -> Archiver ByteString
+readArchiverContents =
+  Archiver . lift . lift . ByteString.readFile
