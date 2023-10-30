@@ -1,4 +1,4 @@
-# Revision history for effective-haskell-archiver
+# Revision history for samples
 
 ## 0.1.0.0 -- YYYY-mm-dd
 
