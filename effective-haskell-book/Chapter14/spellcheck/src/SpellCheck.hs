@@ -1,22 +1,26 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module SpellCheck where
 
+import Control.Monad (foldM)
+import Control.Monad.ST (ST, runST)
 import Data.Text qualified as T
-import SpellCheck.ListMemo (editDistance)
+import SpellCheck.STMemo (MemoCache, cacheSuffixDistances, editDistance, newCache)
 import SpellCheck.Types (SuggestedMatch (SuggestedMatch))
 
-spellcheckWord :: [T.Text] -> Int -> T.Text -> [SuggestedMatch]
-spellcheckWord dictionary threshold word =
-  getSuggestions dictionary []
+spellcheckWord :: MemoCache s -> [T.Text] -> Int -> T.Text -> ST s [SuggestedMatch]
+spellcheckWord cache dictionary threshold word =
+  foldM getSuggestions [] dictionary
   where
-    getSuggestions [] suggestions = suggestions
-    getSuggestions (dictWord : dict) suggestions
-      | distance == 0 = []
-      | distance > threshold = getSuggestions dict suggestions
-      | otherwise = getSuggestions dict (suggestion : suggestions)
-      where
-        distance = editDistance dictWord word
-        suggestion = SuggestedMatch dictWord word distance
+    getSuggestions suggestions dictWord = do
+      cacheSuffixDistances cache dictWord ["s", "es", "'s", "ed", "ing"]
+      distance <- editDistance cache dictWord word
+      let suggestion = SuggestedMatch dictWord word distance
+      if distance > 0 && distance <= threshold
+        then pure (suggestion : suggestions)
+        else pure suggestions
 
 spellcheck :: [T.Text] -> Int -> [T.Text] -> [SuggestedMatch]
-spellcheck dictionary threshold =
-  concatMap (spellcheckWord dictionary threshold)
+spellcheck dictionary threshold words = runST $ do
+  cache <- newCache
+  concat <$> traverse (spellcheckWord cache dictionary threshold) words

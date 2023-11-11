@@ -63,6 +63,7 @@ library
                     , SpellCheck.Naive
                     , SpellCheck.Types
                     , SpellCheck.ListMemo
+                    , SpellCheck.STMemo
 
     -- Modules included in this library but not exported.
     -- other-modules:
