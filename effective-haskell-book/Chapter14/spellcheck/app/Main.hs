@@ -13,5 +13,5 @@ main = do
   forM_ (tail args) $ \path -> do
     content <- readFile path
     let fileWords = split (== ' ') $ pack content
-        match = spellcheck dictionary 3 fileWords
+        match = spellcheck dictionary 10 fileWords
     print match

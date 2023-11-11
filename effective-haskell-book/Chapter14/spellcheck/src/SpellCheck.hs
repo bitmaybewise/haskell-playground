@@ -1,7 +1,7 @@
 module SpellCheck where
 
 import Data.Text qualified as T
-import SpellCheck.Naive (editDistance)
+import SpellCheck.ListMemo (editDistance)
 import SpellCheck.Types (SuggestedMatch (SuggestedMatch))
 
 spellcheckWord :: [T.Text] -> Int -> T.Text -> [SuggestedMatch]
