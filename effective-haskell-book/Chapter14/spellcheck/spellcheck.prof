@@ -1,64 +1,113 @@
-	Sat Nov 11 15:19 2023 Time and Allocation Profiling Report  (Final)
+	Mon Nov 13 23:25 2023 Time and Allocation Profiling Report  (Final)
 
 	   spellcheck +RTS -s -p -RTS ./words.txt ./typo.txt
 
-	total time  =        3.34 secs   (3337 ticks @ 1000 us, 1 processor)
-	total alloc = 3,211,652,320 bytes  (excludes profiling overheads)
+	total time  =        2.23 secs   (2225 ticks @ 1000 us, 1 processor)
+	total alloc = 1,070,094,296 bytes  (excludes profiling overheads)
 
-COST CENTRE                       MODULE            SRC                                      %time %alloc
+COST CENTRE                            MODULE                        SRC                                                    %time %alloc
 
-main.\                            Main              app/Main.hs:(13,32)-(17,15)               34.1    0.0
-readCache                         SpellCheck.STMemo src/SpellCheck/STMemo.hs:(15,1)-(16,49)   30.0    1.2
-updateCache                       SpellCheck.STMemo src/SpellCheck/STMemo.hs:(19,1)-(20,58)   25.8   69.0
-editDistance.findDistance         SpellCheck.STMemo src/SpellCheck/STMemo.hs:(38,5)-(50,32)    5.1   16.3
-editDistance.memoizedEditDistance SpellCheck.STMemo src/SpellCheck/STMemo.hs:(28,5)-(36,26)    1.9    0.0
-showsPrec                         SpellCheck.Types  src/SpellCheck/Types.hs:13:13-16           1.4    8.3
-cacheSuffixDistances.cacheSuffix  SpellCheck.STMemo src/SpellCheck/STMemo.hs:(56,5)-(57,71)    0.4    1.2
-editDistance.findDistance.restOfB SpellCheck.STMemo src/SpellCheck/STMemo.hs:50:9-32           0.3    1.4
-editDistance.findDistance.restOfA SpellCheck.STMemo src/SpellCheck/STMemo.hs:49:9-32           0.3    1.4
+main.\                                 Main                          app/Main.hs:(13,32)-(17,15)                             56.3    0.1
+spellcheckWord.getSuggestions.distance SpellCheck                    src/SpellCheck.hs:18:11-47                              17.6    7.7
+primitive                              Control.Monad.Primitive       Control/Monad/Primitive.hs:220:3-16                     12.8    0.0
+basicUnsafeRead                        Data.Vector.Primitive.Mutable src/Data/Vector/Primitive/Mutable.hs:156:3-63            4.1   23.8
+basicUnsafeWrite                       Data.Vector.Primitive.Mutable src/Data/Vector/Primitive/Mutable.hs:159:3-69            2.5   16.3
+basicUnsafeRead                        Data.Vector.Unboxed.Base      src/Data/Vector/Unboxed/Base.hs:447:786-838              2.0    0.0
+showsPrec                              SpellCheck.Types              src/SpellCheck/Types.hs:13:13-16                         1.5   24.8
+basicUnsafeWrite                       Data.Vector.Unboxed.Base      src/Data/Vector/Unboxed/Base.hs:447:842-900              1.3    0.0
+readByteArray#                         Data.Primitive.Types          Data/Primitive/Types.hs:363:27-126                       0.8   15.8
+main                                   Main                          app/Main.hs:(9,1)-(17,15)                                0.2    2.1
+cacheSuffixDistances.cacheSuffix       SpellCheck.STMemo             src/SpellCheck/STMemo.hs:(56,5)-(57,71)                  0.1    2.0
+updateCache                            SpellCheck.STMemo             src/SpellCheck/STMemo.hs:(19,1)-(20,58)                  0.0    1.1
+basicUnsafeNew                         Data.Vector.Primitive.Mutable src/Data/Vector/Primitive/Mutable.hs:(140,3)-(146,37)    0.0    4.1
 
 
-                                                                                                                                   individual      inherited
-COST CENTRE                                     MODULE                  SRC                                     no.     entries  %time %alloc   %time %alloc
+                                                                                                                                                       individual      inherited
+COST CENTRE                                     MODULE                        SRC                                                   no.     entries  %time %alloc   %time %alloc
 
-MAIN                                            MAIN                    <built-in>                              220           0    0.0    0.0   100.0  100.0
- CAF                                            Main                    <entire-module>                         439           0    0.0    0.0     0.0    0.0
-  main                                          Main                    app/Main.hs:(9,1)-(17,15)               440           1    0.0    0.0     0.0    0.0
- CAF                                            SpellCheck              <entire-module>                         438           0    0.0    0.0     0.0    0.0
-  spellcheckWord                                SpellCheck              src/SpellCheck.hs:(12,1)-(21,29)        459           0    0.0    0.0     0.0    0.0
-   spellcheckWord.getSuggestions                SpellCheck              src/SpellCheck.hs:(15,5)-(21,29)        460           0    0.0    0.0     0.0    0.0
- CAF                                            SpellCheck.Types        <entire-module>                         437           0    0.0    0.0     0.0    0.0
-  showList                                      SpellCheck.Types        src/SpellCheck/Types.hs:13:13-16        443           1    0.0    0.0     0.0    0.0
- CAF                                            SpellCheck.STMemo       <entire-module>                         436           0    0.0    0.0     0.0    0.0
-  newCache                                      SpellCheck.STMemo       src/SpellCheck/STMemo.hs:23:1-43        447           1    0.0    0.0     0.0    0.0
- CAF                                            Data.Text.Array         <entire-module>                         434           0    0.0    0.0     0.0    0.0
- CAF                                            GHC.Conc.Signal         <entire-module>                         340           0    0.0    0.0     0.0    0.0
- CAF                                            GHC.IO.Encoding         <entire-module>                         320           0    0.0    0.0     0.0    0.0
- CAF                                            GHC.IO.Encoding.Iconv   <entire-module>                         318           0    0.0    0.0     0.0    0.0
- CAF                                            GHC.IO.Exception        <entire-module>                         312           0    0.0    0.0     0.0    0.0
- CAF                                            GHC.IO.FD               <entire-module>                         311           0    0.0    0.0     0.0    0.0
- CAF                                            GHC.IO.Handle.FD        <entire-module>                         309           0    0.0    0.0     0.0    0.0
- CAF                                            GHC.IO.Handle.Internals <entire-module>                         308           0    0.0    0.0     0.0    0.0
- CAF                                            GHC.Weak.Finalize       <entire-module>                         276           0    0.0    0.0     0.0    0.0
- main                                           Main                    app/Main.hs:(9,1)-(17,15)               441           0    0.2    0.7   100.0  100.0
-  main.\                                        Main                    app/Main.hs:(13,32)-(17,15)             442           1   34.1    0.0    99.6   99.0
-   main.\.fileWords                             Main                    app/Main.hs:15:9-49                     449           1    0.0    0.0     0.0    0.0
-   main.\.match                                 Main                    app/Main.hs:16:9-50                     445           1    0.0    0.0    64.0   90.6
-    spellcheck                                  SpellCheck              src/SpellCheck.hs:(24,1)-(26,71)        446           1    0.0    0.1    64.0   90.6
-     spellcheckWord                             SpellCheck              src/SpellCheck.hs:(12,1)-(21,29)        450           1    0.0    0.1    64.0   90.5
-      spellcheckWord.getSuggestions             SpellCheck              src/SpellCheck.hs:(15,5)-(21,29)        452       49570    0.0    0.1    64.0   90.5
-       cacheSuffixDistances                     SpellCheck.STMemo       src/SpellCheck/STMemo.hs:(53,1)-(57,71) 453       49570    0.1    0.0     5.9   10.2
-        cacheSuffixDistances.cacheSuffix        SpellCheck.STMemo       src/SpellCheck/STMemo.hs:(56,5)-(57,71) 454      247850    0.4    1.2     5.9   10.2
-         updateCache                            SpellCheck.STMemo       src/SpellCheck/STMemo.hs:(19,1)-(20,58) 455      247850    5.4    9.0     5.4    9.0
-       spellcheckWord.getSuggestions.suggestion SpellCheck              src/SpellCheck.hs:18:11-60              465       34845    0.0    0.0     0.0    0.0
-       editDistance                             SpellCheck.STMemo       src/SpellCheck/STMemo.hs:(26,1)-(50,32) 456           1    0.1    0.0    58.1   80.2
-        editDistance.memoizedEditDistance       SpellCheck.STMemo       src/SpellCheck/STMemo.hs:(28,5)-(36,26) 457     3994949    1.9    0.0    58.0   80.1
-         readCache                              SpellCheck.STMemo       src/SpellCheck/STMemo.hs:(15,1)-(16,49) 458     3994949   30.0    1.2    30.0    1.2
-         editDistance.findDistance              SpellCheck.STMemo       src/SpellCheck/STMemo.hs:(38,5)-(50,32) 461     1549479    5.1   16.3     5.7   19.0
-          editDistance.findDistance.restOfA     SpellCheck.STMemo       src/SpellCheck/STMemo.hs:49:9-32        462     1356489    0.3    1.4     0.3    1.4
-          editDistance.findDistance.restOfB     SpellCheck.STMemo       src/SpellCheck/STMemo.hs:50:9-32        464     1356489    0.3    1.4     0.3    1.4
-         updateCache                            SpellCheck.STMemo       src/SpellCheck/STMemo.hs:(19,1)-(20,58) 463     1549479   20.4   60.0    20.4   60.0
-     newCache                                   SpellCheck.STMemo       src/SpellCheck/STMemo.hs:23:1-43        448           0    0.0    0.0     0.0    0.0
-   showList                                     SpellCheck.Types        src/SpellCheck/Types.hs:13:13-16        444           0    0.1    0.1     1.5    8.4
-    showsPrec                                   SpellCheck.Types        src/SpellCheck/Types.hs:13:13-16        466       34845    1.4    8.3     1.4    8.3
-  main.dictionary                               Main                    app/Main.hs:12:7-49                     451           1    0.2    0.3     0.2    0.3
+MAIN                                            MAIN                          <built-in>                                            257           0    0.0    0.0   100.0  100.0
+ CAF                                            Main                          <entire-module>                                       513           0    0.0    0.0     0.0    0.0
+  main                                          Main                          app/Main.hs:(9,1)-(17,15)                             514           1    0.0    0.0     0.0    0.0
+ CAF                                            SpellCheck.Types              <entire-module>                                       511           0    0.0    0.0     0.0    0.0
+  showList                                      SpellCheck.Types              src/SpellCheck/Types.hs:13:13-16                      517           1    0.0    0.0     0.0    0.0
+ CAF                                            SpellCheck.STMemo             <entire-module>                                       510           0    0.0    0.0     0.0    0.0
+  newCache                                      SpellCheck.STMemo             src/SpellCheck/STMemo.hs:23:1-43                      521           1    0.0    0.0     0.0    0.0
+ CAF                                            SpellCheck.LowLevelUnboxed    <entire-module>                                       509           0    0.0    0.0     0.0    0.0
+  basicInitialize                               Data.Vector.Unboxed.Base      src/Data/Vector/Unboxed/Base.hs:447:662-710           553           0    0.0    0.0     0.0    0.0
+   basicInitialize                              Data.Vector.Primitive.Mutable src/Data/Vector/Primitive/Mutable.hs:(149,3)-(152,36) 554           0    0.0    0.0     0.0    0.0
+    basicInitialize.size                        Data.Vector.Primitive.Mutable src/Data/Vector/Primitive/Mutable.hs:152:7-36         555           0    0.0    0.0     0.0    0.0
+     sizeOf                                     Data.Primitive.Types          Data/Primitive/Types.hs:170:1-25                      556           1    0.0    0.0     0.0    0.0
+      sizeOf#                                   Data.Primitive.Types          Data/Primitive/Types.hs:363:10-19                     557           0    0.0    0.0     0.0    0.0
+       sizeOf#                                  Data.Primitive.Types          Data/Primitive/Types.hs:83:3-44                       558           1    0.0    0.0     0.0    0.0
+        sizeOfType#                             Data.Primitive.Types          Data/Primitive/Types.hs:363:29-60                     559           1    0.0    0.0     0.0    0.0
+         unI#                                   Data.Primitive.Types          Data/Primitive/Types.hs:346:1-17                      560           1    0.0    0.0     0.0    0.0
+  basicUnsafeNew                                Data.Vector.Unboxed.Base      src/Data/Vector/Unboxed/Base.hs:447:606-658           539           0    0.0    0.0     0.0    0.0
+   basicUnsafeNew                               Data.Vector.Primitive.Mutable src/Data/Vector/Primitive/Mutable.hs:(140,3)-(146,37) 540           0    0.0    0.0     0.0    0.0
+    basicUnsafeNew.size                         Data.Vector.Primitive.Mutable src/Data/Vector/Primitive/Mutable.hs:145:7-36         541           1    0.0    0.0     0.0    0.0
+     sizeOf                                     Data.Primitive.Types          Data/Primitive/Types.hs:170:1-25                      542           1    0.0    0.0     0.0    0.0
+      sizeOf#                                   Data.Primitive.Types          Data/Primitive/Types.hs:363:10-19                     544           0    0.0    0.0     0.0    0.0
+       sizeOf#                                  Data.Primitive.Types          Data/Primitive/Types.hs:83:3-44                       545           1    0.0    0.0     0.0    0.0
+        sizeOfType#                             Data.Primitive.Types          Data/Primitive/Types.hs:363:29-60                     546           1    0.0    0.0     0.0    0.0
+         unI#                                   Data.Primitive.Types          Data/Primitive/Types.hs:346:1-17                      547           1    0.0    0.0     0.0    0.0
+    basicUnsafeNew.mx                           Data.Vector.Primitive.Mutable src/Data/Vector/Primitive/Mutable.hs:146:7-37         549           0    0.0    0.0     0.0    0.0
+ CAF                                            Data.Vector.Internal.Check    <entire-module>                                       508           0    0.0    0.0     0.0    0.0
+  doBoundsChecks                                Data.Vector.Internal.Check    src/Data/Vector/Internal/Check.hs:63:1-21             531           1    0.0    0.0     0.0    0.0
+  doUnsafeChecks                                Data.Vector.Internal.Check    src/Data/Vector/Internal/Check.hs:72:1-22             534           1    0.0    0.0     0.0    0.0
+ CAF                                            Data.Primitive.MachDeps       <entire-module>                                       493           0    0.0    0.0     0.0    0.0
+  sIZEOF_INT                                    Data.Primitive.MachDeps       Data/Primitive/MachDeps.hs:71:1-14                    548           1    0.0    0.0     0.0    0.0
+ CAF                                            Data.Primitive.Types          <entire-module>                                       492           0    0.0    0.0     0.0    0.0
+  liberate#                                     Data.Primitive.Types          Data/Primitive/Types.hs:331:1-25                      567           1    0.0    0.0     0.0    0.0
+  sizeOf#                                       Data.Primitive.Types          Data/Primitive/Types.hs:363:10-19                     543           1    0.0    0.0     0.0    0.0
+ CAF                                            Data.Text.Array               <entire-module>                                       489           0    0.0    0.0     0.0    0.0
+ CAF                                            GHC.Conc.Signal               <entire-module>                                       377           0    0.0    0.0     0.0    0.0
+ CAF                                            GHC.IO.Encoding               <entire-module>                                       357           0    0.0    0.0     0.0    0.0
+ CAF                                            GHC.IO.Encoding.Iconv         <entire-module>                                       355           0    0.0    0.0     0.0    0.0
+ CAF                                            GHC.IO.Exception              <entire-module>                                       349           0    0.0    0.0     0.0    0.0
+ CAF                                            GHC.IO.FD                     <entire-module>                                       348           0    0.0    0.0     0.0    0.0
+ CAF                                            GHC.IO.Handle.FD              <entire-module>                                       346           0    0.0    0.0     0.0    0.0
+ CAF                                            GHC.IO.Handle.Internals       <entire-module>                                       345           0    0.0    0.0     0.0    0.0
+ CAF                                            GHC.Weak.Finalize             <entire-module>                                       313           0    0.0    0.0     0.0    0.0
+ main                                           Main                          app/Main.hs:(9,1)-(17,15)                             515           0    0.2    2.1   100.0  100.0
+  main.\                                        Main                          app/Main.hs:(13,32)-(17,15)                           516           1   56.3    0.1    99.6   97.0
+   main.\.fileWords                             Main                          app/Main.hs:15:9-49                                   523           1    0.0    0.0     0.0    0.0
+   main.\.match                                 Main                          app/Main.hs:16:9-50                                   519           1    0.0    0.0    41.8   71.8
+    spellcheck                                  SpellCheck                    src/SpellCheck.hs:(25,1)-(27,71)                      520           1    0.0    0.2    41.8   71.8
+     spellcheckWord                             SpellCheck                    src/SpellCheck.hs:(13,1)-(22,29)                      524           1    0.1    0.2    41.7   71.6
+      spellcheckWord.getSuggestions             SpellCheck                    src/SpellCheck.hs:(16,5)-(22,29)                      526       49570    0.1    0.3    41.6   71.4
+       cacheSuffixDistances                     SpellCheck.STMemo             src/SpellCheck/STMemo.hs:(53,1)-(57,71)               527       49570    0.0    0.0     0.1    3.1
+        cacheSuffixDistances.cacheSuffix        SpellCheck.STMemo             src/SpellCheck/STMemo.hs:(56,5)-(57,71)               528      247850    0.1    2.0     0.1    3.1
+         updateCache                            SpellCheck.STMemo             src/SpellCheck/STMemo.hs:(19,1)-(20,58)               529      247850    0.0    1.1     0.0    1.1
+       spellcheckWord.getSuggestions.distance   SpellCheck                    src/SpellCheck.hs:18:11-47                            530       49570   17.6    7.7    41.3   68.0
+        primitive                               Control.Monad.Primitive       Control/Monad/Primitive.hs:220:3-16                   533    15257577    2.0    0.0     3.2    4.3
+         basicInitialize                        Data.Vector.Unboxed.Base      src/Data/Vector/Unboxed/Base.hs:447:662-710           550       49570    0.0    0.0     0.0    0.2
+          basicInitialize                       Data.Vector.Primitive.Mutable src/Data/Vector/Primitive/Mutable.hs:(149,3)-(152,36) 551       49570    0.0    0.2     0.0    0.2
+           basicInitialize.size                 Data.Vector.Primitive.Mutable src/Data/Vector/Primitive/Mutable.hs:152:7-36         552       49570    0.0    0.0     0.0    0.0
+           setByteArray#                        Data.Primitive.Types          Data/Primitive/Types.hs:351:208-406                   561       49570    0.0    0.0     0.0    0.0
+            internal                            Control.Monad.Primitive       Control/Monad/Primitive.hs:113:3-21                   564       49570    0.0    0.0     0.0    0.0
+            setByteArray#.i                     Data.Primitive.Types          Data/Primitive/Types.hs:351:254-277                   563       49570    0.0    0.0     0.0    0.0
+            setByteArray#.n                     Data.Primitive.Types          Data/Primitive/Types.hs:351:281-304                   562       49570    0.0    0.0     0.0    0.0
+            shimmedSetWord8Array#               Data.Primitive.Types          Data/Primitive/Types.hs:333:1-172                     565       49570    0.0    0.0     0.0    0.0
+             shimmedSetWord8Array#.\            Data.Primitive.Types          Data/Primitive/Types.hs:333:57-171                    566       49570    0.0    0.0     0.0    0.0
+         basicUnsafeNew                         Data.Vector.Unboxed.Base      src/Data/Vector/Unboxed/Base.hs:447:606-658           536       49570    0.0    0.0     0.0    4.1
+          basicUnsafeNew                        Data.Vector.Primitive.Mutable src/Data/Vector/Primitive/Mutable.hs:(140,3)-(146,37) 537       49570    0.0    4.1     0.0    4.1
+           basicUnsafeNew.mx                    Data.Vector.Primitive.Mutable src/Data/Vector/Primitive/Mutable.hs:146:7-37         538       49570    0.0    0.0     0.0    0.0
+         internal                               Control.Monad.Primitive       Control/Monad/Primitive.hs:224:3-21                   535       49570    0.0    0.0     0.0    0.0
+         basicUnsafeWrite                       Data.Vector.Unboxed.Base      src/Data/Vector/Unboxed/Base.hs:447:842-900           578           0    0.0    0.0     1.2    0.0
+          basicUnsafeWrite                      Data.Vector.Primitive.Mutable src/Data/Vector/Primitive/Mutable.hs:159:3-69         579           0    1.0    0.0     1.2    0.0
+           writeByteArray#                      Data.Primitive.Types          Data/Primitive/Types.hs:363:130-196                   580     3515351    0.2    0.0     0.2    0.0
+        internal                                Control.Monad.Primitive       Control/Monad/Primitive.hs:224:3-21                   532    15108867    0.0    0.0     0.0    0.0
+        basicUnsafeRead                         Data.Vector.Unboxed.Base      src/Data/Vector/Unboxed/Base.hs:447:786-838           574    10595623    2.0    0.0    15.9   39.6
+         basicUnsafeRead                        Data.Vector.Primitive.Mutable src/Data/Vector/Primitive/Mutable.hs:156:3-63         575    10595623    4.1   23.8    13.9   39.6
+          primitive                             Control.Monad.Primitive       Control/Monad/Primitive.hs:220:3-16                   576    10595623    9.0    0.0     9.8   15.8
+           readByteArray#                       Data.Primitive.Types          Data/Primitive/Types.hs:363:27-126                    577    10595623    0.8   15.8     0.8   15.8
+        basicUnsafeWrite                        Data.Vector.Unboxed.Base      src/Data/Vector/Unboxed/Base.hs:447:842-900           570     4463674    1.3    0.0     4.5   16.3
+         basicUnsafeWrite                       Data.Vector.Primitive.Mutable src/Data/Vector/Primitive/Mutable.hs:159:3-69         571     4463674    1.5   16.3     3.3   16.3
+          primitive                             Control.Monad.Primitive       Control/Monad/Primitive.hs:220:3-16                   572     4463674    1.8    0.0     1.8    0.0
+           writeByteArray#                      Data.Primitive.Types          Data/Primitive/Types.hs:363:130-196                   573      948323    0.0    0.0     0.0    0.0
+        basicLength                             Data.Vector.Unboxed.Base      src/Data/Vector/Unboxed/Base.hs:447:424-464           568      198279    0.0    0.0     0.1    0.2
+         basicLength                            Data.Vector.Primitive.Mutable src/Data/Vector/Primitive/Mutable.hs:128:3-33         569      198279    0.1    0.2     0.1    0.2
+       spellcheckWord.getSuggestions.suggestion SpellCheck                    src/SpellCheck.hs:19:11-60                            581       34845    0.0    0.0     0.0    0.0
+     newCache                                   SpellCheck.STMemo             src/SpellCheck/STMemo.hs:23:1-43                      522           0    0.0    0.0     0.0    0.0
+   showList                                     SpellCheck.Types              src/SpellCheck/Types.hs:13:13-16                      518           0    0.1    0.3     1.6   25.1
+    showsPrec                                   SpellCheck.Types              src/SpellCheck/Types.hs:13:13-16                      582       34845    1.5   24.8     1.5   24.8
+  main.dictionary                               Main                          app/Main.hs:12:7-49                                   525           1    0.1    0.9     0.1    0.9

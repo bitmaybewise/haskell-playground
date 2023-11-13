@@ -5,7 +5,8 @@ module SpellCheck where
 import Control.Monad (foldM)
 import Control.Monad.ST (ST, runST)
 import Data.Text qualified as T
-import SpellCheck.STMemo (MemoCache, cacheSuffixDistances, editDistance, newCache)
+import SpellCheck.LowLevelUnboxed
+import SpellCheck.STMemo (MemoCache, cacheSuffixDistances, newCache)
 import SpellCheck.Types (SuggestedMatch (SuggestedMatch))
 
 spellcheckWord :: MemoCache s -> [T.Text] -> Int -> T.Text -> ST s [SuggestedMatch]
@@ -14,8 +15,8 @@ spellcheckWord cache dictionary threshold word =
   where
     getSuggestions suggestions dictWord = do
       cacheSuffixDistances cache dictWord ["s", "es", "'s", "ed", "ing"]
-      distance <- editDistance cache dictWord word
-      let suggestion = SuggestedMatch dictWord word distance
+      let distance = editDistance dictWord word
+          suggestion = SuggestedMatch dictWord word distance
       if distance > 0 && distance <= threshold
         then pure (suggestion : suggestions)
         else pure suggestions

@@ -64,6 +64,8 @@ library
                     , SpellCheck.Types
                     , SpellCheck.ListMemo
                     , SpellCheck.STMemo
+                    , SpellCheck.STVec
+                    , SpellCheck.LowLevelUnboxed
 
     -- Modules included in this library but not exported.
     -- other-modules:
