@@ -1,8 +1,9 @@
 module Main where
 
-import qualified MyLib (someFunc)
+import System.Environment (getEnv)
+import TMDB (runTMBD)
 
 main :: IO ()
 main = do
-  putStrLn "Hello, Haskell!"
-  MyLib.someFunc
+  tmdbToken <- getEnv "TMDB_API_READ_ACCESS_TOKEN"
+  runTMBD tmdbToken
