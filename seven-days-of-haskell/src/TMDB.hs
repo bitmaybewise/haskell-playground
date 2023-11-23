@@ -3,7 +3,7 @@
 module TMDB where
 
 import Data.Aeson (Value (..), (.:))
-import Data.Aeson.Types (FromJSON (parseJSON), prependFailure, typeMismatch)
+import Data.Aeson.Types (FromJSON (parseJSON), Parser, prependFailure, typeMismatch)
 import Data.ByteString.Char8 qualified as Char8
 import GHC.Generics (Generic)
 import Network.HTTP.Simple (getResponseBody, httpJSON, setRequestBearerAuth)
@@ -11,18 +11,26 @@ import Network.HTTP.Simple (getResponseBody, httpJSON, setRequestBearerAuth)
 data Movie = Movie
   { id :: Int,
     title :: String,
-    overview :: String,
-    releaseDate :: String
+    releaseDate :: String,
+    posterURL :: String,
+    voteAverage :: Float
   }
-  deriving (Show, Generic)
+  deriving (Show)
+
+posterBaseURL :: String
+posterBaseURL = "https://image.tmdb.org/t/p/w500"
 
 instance FromJSON Movie where
+  parseJSON :: Value -> Parser Movie
   parseJSON (Object v) =
     Movie
       <$> v .: "id"
       <*> v .: "title"
-      <*> v .: "overview"
       <*> v .: "release_date"
+      <*> ( (posterBaseURL ++)
+              <$> v .: "poster_path"
+          )
+      <*> v .: "vote_average"
   parseJSON invalid =
     prependFailure "parsing TMDB movie failed, " (typeMismatch "Object" invalid)
 
@@ -41,5 +49,4 @@ runTMBD bearearToken = do
           "GET https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc"
   response <- httpJSON req
   let body = getResponseBody response :: Response
-      movies = map (\mv -> (title mv, releaseDate mv)) (results body)
-  mapM_ print movies
+  mapM_ print $ results body
