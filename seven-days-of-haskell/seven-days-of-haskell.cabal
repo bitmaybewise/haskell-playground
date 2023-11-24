@@ -73,6 +73,7 @@ library
                     , http-conduit
                     , aeson
                     , bytestring
+                    , blaze-html
 
     -- Directories containing source files.
     hs-source-dirs:   src

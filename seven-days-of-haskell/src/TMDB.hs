@@ -1,12 +1,30 @@
+{-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module TMDB where
 
+import Control.Monad (forM_)
 import Data.Aeson (Value (..), (.:))
 import Data.Aeson.Types (FromJSON (parseJSON), Parser, prependFailure, typeMismatch)
 import Data.ByteString.Char8 qualified as Char8
 import GHC.Generics (Generic)
 import Network.HTTP.Simple (getResponseBody, httpJSON, setRequestBearerAuth)
+import Text.Blaze.Html.Renderer.String qualified as Renderer
+import Text.Blaze.Html5
+  ( Html,
+    body,
+    br,
+    docTypeHtml,
+    img,
+    li,
+    p,
+    toHtml,
+    toValue,
+    ul,
+    (!),
+  )
+import Text.Blaze.Html5 qualified as Html
+import Text.Blaze.Html5.Attributes (src)
 
 data Movie = Movie
   { id :: Int,
@@ -48,5 +66,23 @@ runTMBD bearearToken = do
           (Char8.pack bearearToken)
           "GET https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc"
   response <- httpJSON req
-  let body = getResponseBody response :: Response
-  mapM_ print $ results body
+  let resBody = getResponseBody response :: Response
+  putStrLn . Renderer.renderHtml . renderMovies $ resBody.results
+
+renderMovies :: [Movie] -> Html
+renderMovies movies =
+  docTypeHtml $ do
+    Html.head $ do
+      Html.title "7 days of Haskell"
+      body $ do
+        p "Popular movies"
+        ul $ forM_ movies $ \movie ->
+          li $ do
+            Html.span $ toHtml movie.title
+            br
+            img ! src (toValue movie.posterURL)
+            br
+            Html.span $ toHtml (footnote movie)
+  where
+    footnote movie =
+      "Nota: " ++ show movie.voteAverage ++ " - Lançamento: " ++ movie.releaseDate
