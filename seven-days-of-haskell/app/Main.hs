@@ -1,9 +1,11 @@
 module Main where
 
+import Lib (run)
 import System.Environment (getEnv)
-import TMDB (runTMBD)
 
 main :: IO ()
 main = do
   tmdbToken <- getEnv "TMDB_API_READ_ACCESS_TOKEN"
-  runTMBD tmdbToken
+  marvelApikey <- getEnv "MARVEL_PUBLIC_KEY"
+  marvelPrivatekey <- getEnv "MARVEL_PRIVATE_KEY"
+  run tmdbToken marvelApikey marvelPrivatekey

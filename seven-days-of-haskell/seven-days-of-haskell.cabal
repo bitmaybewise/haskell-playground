@@ -59,9 +59,11 @@ library
     import:           warnings
 
     -- Modules exported by the library.
-    exposed-modules:  TMDB
+    exposed-modules:  Lib
+                    , Content
+                    , Html
                     , TMDB.ApiClient
-                    , TMDB.Html
+                    , Marvel.ApiClient
 
     -- Modules included in this library but not exported.
     -- other-modules:
@@ -76,6 +78,8 @@ library
                     , aeson
                     , bytestring
                     , blaze-html
+                    , unix-time
+                    , hashing
 
     -- Directories containing source files.
     hs-source-dirs:   src
@@ -105,6 +109,17 @@ executable seven-days-of-haskell
     hs-source-dirs:   app
 
     -- Base language which the package is written in.
+    default-language: GHC2021
+
+executable play
+    main-is:          Playground.hs
+    build-depends:
+        base ^>=4.18.1.0,
+        seven-days-of-haskell,
+        unix-time,
+        hashing,
+        bytestring
+    hs-source-dirs:   app
     default-language: GHC2021
 
 test-suite seven-days-of-haskell-test
