@@ -15,7 +15,7 @@ data Movie = Movie
     posterURL :: String,
     voteAverage :: Float
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 posterBaseURL :: String
 posterBaseURL = "https://image.tmdb.org/t/p/w500"

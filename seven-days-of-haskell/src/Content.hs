@@ -22,3 +22,9 @@ instance Content Marvel.Series where
   release = show . Marvel.startYear
   url = Marvel.path . Marvel.thumbnail
   rating series = fromMaybe 0 (readMaybe $ Marvel.rating series :: Maybe Float)
+
+compare :: (Eq a, Content a) => a -> a -> Ordering
+compare a b
+  | rating a > rating b = GT
+  | rating a < rating b = LT
+  | otherwise = EQ

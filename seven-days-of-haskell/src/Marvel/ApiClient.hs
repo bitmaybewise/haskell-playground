@@ -14,7 +14,7 @@ data Image = Image
   { path :: String,
     extension :: String
   }
-  deriving (Show, Generic)
+  deriving (Show, Eq, Generic)
 
 instance FromJSON Image
 
@@ -26,7 +26,7 @@ data Series = Series
     rating :: String,
     thumbnail :: Image
   }
-  deriving (Show, Generic)
+  deriving (Show, Eq, Generic)
 
 instance FromJSON Series
 
